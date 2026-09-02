@@ -23,6 +23,7 @@ Plataforma moderna, minimalista e responsiva de gestão financeira familiar, des
 - **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons.
 - **BaaS (Backend as a Service)**: Supabase PostgreSQL 17 com Row Level Security (RLS) mandatório.
 - **Hospedagem & Borda**: Cloudflare Pages com certificados SSL/TLS automáticos e cabeçalhos de segurança (HSTS, CSP estrito).
+- **URL de Produção**: [meu-bolso-t1k.pages.dev](https://meu-bolso-t1k.pages.dev)
 - **Controle de Versão & CI/CD**: GitHub com artefatos vivos do GitHub Spec Kit.
 
 ---

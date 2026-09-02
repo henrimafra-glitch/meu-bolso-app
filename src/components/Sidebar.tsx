@@ -77,11 +77,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {darkMode ? 'Escuro' : 'Claro'}
           </span>
         </button>
-
-        <div className="px-3.5 py-2 text-[10px] text-slate-400">
-          <p>Meu Bolso v1.0 · Always Free</p>
-          <p className="text-slate-500">Cloudflare Pages & Supabase</p>
-        </div>
       </div>
     </aside>
   );

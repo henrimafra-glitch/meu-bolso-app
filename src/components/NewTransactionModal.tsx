@@ -8,7 +8,7 @@ interface NewTransactionModalProps {
   categories: Category[];
   members: FamilyMember[];
   currentMember: FamilyMember;
-  selectedMonth?: string;
+  defaultDate?: string;
   onSave: (data: {
     type: TransactionType;
     description: string;
@@ -26,6 +26,7 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
   categories,
   members,
   currentMember,
+  defaultDate,
   onSave,
 }) => {
   const [type, setType] = useState<TransactionType>('expense');
@@ -34,7 +35,13 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [paidBy, setPaidBy] = useState(currentMember.user_id);
   const [splitType, setSplitType] = useState<SplitType>('split_50_50');
-  const [date, setDate] = useState('2026-03-03');
+  const [date, setDate] = useState(defaultDate || '2026-03-03');
+
+  useEffect(() => {
+    if (isOpen && defaultDate) {
+      setDate(defaultDate);
+    }
+  }, [isOpen, defaultDate]);
 
   // Acessibilidade: Fechar no ESC e travar scroll do body
   useEffect(() => {

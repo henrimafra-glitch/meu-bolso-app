@@ -41,7 +41,6 @@ export function App() {
   });
 
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedMonth, setSelectedMonth] = useState('Março 2026');
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
@@ -83,23 +82,27 @@ export function App() {
     localStorage.setItem('meu_bolso_goals', JSON.stringify(goals));
   }, [goals]);
 
-  const availableMonths = [
-    'Janeiro 2026',
-    'Fevereiro 2026',
-    'Março 2026',
-    'Abril 2026',
-    'Maio 2026',
+  const MONTH_NAMES = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
   ];
 
-  const monthCodeMap: Record<string, string> = {
-    'Janeiro 2026': '2026-01',
-    'Fevereiro 2026': '2026-02',
-    'Março 2026': '2026-03',
-    'Abril 2026': '2026-04',
-    'Maio 2026': '2026-05',
-  };
+  const [currentYear, setCurrentYear] = useState(2026);
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(2); // 2 = Março
 
-  const activeMonthCode = monthCodeMap[selectedMonth] || '2026-03';
+  const selectedMonth = `${MONTH_NAMES[currentMonthIndex]} ${currentYear}`;
+  const activeMonthCode = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}`;
+
   const monthlyTransactions = transactions.filter((t) =>
     t.date.startsWith(activeMonthCode)
   );
@@ -111,14 +114,21 @@ export function App() {
   );
 
   const handlePrevMonth = () => {
-    const idx = availableMonths.indexOf(selectedMonth);
-    if (idx > 0) setSelectedMonth(availableMonths[idx - 1]);
+    if (currentMonthIndex === 0) {
+      setCurrentMonthIndex(11);
+      setCurrentYear((y) => y - 1);
+    } else {
+      setCurrentMonthIndex((m) => m - 1);
+    }
   };
 
   const handleNextMonth = () => {
-    const idx = availableMonths.indexOf(selectedMonth);
-    if (idx < availableMonths.length - 1)
-      setSelectedMonth(availableMonths[idx + 1]);
+    if (currentMonthIndex === 11) {
+      setCurrentMonthIndex(0);
+      setCurrentYear((y) => y + 1);
+    } else {
+      setCurrentMonthIndex((m) => m + 1);
+    }
   };
 
   const handleSaveTransaction = (data: {
@@ -409,6 +419,7 @@ export function App() {
         categories={categories}
         members={members}
         currentMember={currentMember}
+        defaultDate={`${activeMonthCode}-03`}
         onSave={handleSaveTransaction}
       />
 

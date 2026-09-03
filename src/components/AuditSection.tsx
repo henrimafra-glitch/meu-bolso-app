@@ -194,7 +194,15 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
   };
 
   const copyMasterPrompt = () => {
-    const promptText = `Acesse https://meu-bolso-t1k.pages.dev e execute uma auditoria forense completa em todas as 7 zonas da aplicação. Valide se o Saldo Disponível é R$ 10.194,50, se as Despesas Totais são R$ 4.305,50 (30% de comprometimento) e se Juliana Mafra deve a Henrique Mafra R$ 259,75. Cadastre uma despesa de R$ 600,00 por Juliana em 50/50 e comprove a inversão contábil onde Henrique passa a dever R$ 40,25. Inspecione headers Cloudflare (HSTS, X-Frame-Options: DENY) e responsividade mobile.`;
+    const promptText = `Acesse https://meu-bolso-t1k.pages.dev e execute uma auditoria forense completa em todas as 8 zonas da aplicação:
+1. Header & Gestão Familiar: Título "Família Mafra", 3 membros, seletor de mês, controles de tema e atalhos de auditoria em mobile e desktop.
+2. Dashboard Hero: Valide Saldo (R$ 10.194,50), Receitas (R$ 14.500,00), Despesas (R$ 4.305,50), Comprometimento (30%), Barra de Rateio (100%) e Acerto Líquido (Juliana deve a Henrique R$ 259,75).
+3. Orçamentos: Barra consolidada da casa (83% comprometido) e 5 categorias com tetos e alertas.
+4. Transações: Busca por substring, filtros de divisão e exportação de extrato CSV com UTF-8 BOM.
+5. Cofres: Aportes e criação de novos objetivos via GoalModal nativo.
+6. Prova de Fogo (Efeito Borboleta): Registre despesa de R$ 600 por Juliana em 50/50 e comprove a inversão atômica da dívida para Henrique deve a Juliana R$ 40,25.
+7. Console de Autoauditoria (/audit): Execute a bateria de 10 testes, teste os botões de simulação e restauração de dados padrão.
+8. Infraestrutura: Inspecione headers Cloudflare (HSTS, X-Frame-Options: DENY), PWA manifest.json e proteção RLS no Supabase PostgreSQL.`;
     navigator.clipboard.writeText(promptText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

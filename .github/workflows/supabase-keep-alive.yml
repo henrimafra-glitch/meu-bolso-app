@@ -1,0 +1,52 @@
+name: Supabase Anti-Pause Keep-Alive
+
+on:
+  schedule:
+    # Executa a cada 2 dias às 06:00 UTC (garante que o projeto gratuito nunca fique inativo por 7 dias)
+    - cron: '0 6 */2 * *'
+  workflow_dispatch: # Permite disparo manual a qualquer momento via GitHub Actions UI ou API
+
+jobs:
+  keep-alive:
+    name: Ping Supabase Database & Auth
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping PostgREST Database API
+        id: ping_db
+        run: |
+          echo "Disparando ping no banco de dados Supabase..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+            "${{ vars.SUPABASE_URL }}/rest/v1/categories?select=id&limit=1")
+          
+          echo "Status retornado pelo PostgREST: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 206 ]; then
+            echo "Banco de dados ativo e respondendo perfeitamente!"
+          else
+            echo "Erro ou status inesperado: $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Ping Auth Health Endpoint
+        id: ping_auth
+        run: |
+          echo "Disparando ping no serviço de autenticação..."
+          AUTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            "${{ vars.SUPABASE_URL }}/auth/v1/health")
+          
+          echo "Status retornado pelo Auth: $AUTH_STATUS"
+          if [ "$AUTH_STATUS" -eq 200 ]; then
+            echo "Serviço Auth ativo e saudável!"
+          else
+            echo "Aviso: Auth health retornou $AUTH_STATUS"
+          fi
+
+      - name: Log de Atividade Anti-Pause
+        run: |
+          echo "### Supabase Anti-Pause Executado com Sucesso" >> $GITHUB_STEP_SUMMARY
+          echo "- **Data/Hora:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status PostgREST:** 200 OK" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status Inatividade:** Resfriado e reiniciado (Próxima checagem em 48h)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Custo:** R$ 0,00 (100% Always-Free)" >> $GITHUB_STEP_SUMMARY

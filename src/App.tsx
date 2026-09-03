@@ -21,6 +21,7 @@ import { InviteModal } from './components/InviteModal';
 import { AuditSection } from './components/AuditSection';
 import { Toast, ToastData } from './components/Toast';
 import { GoalModal } from './components/GoalModal';
+import { pingSupabase } from './lib/supabase';
 
 export function App() {
   const [family] = useState(initialFamily);
@@ -63,6 +64,11 @@ export function App() {
       localStorage.setItem('meu_bolso_theme', 'light');
     }
   }, [darkMode]);
+
+  // Anti-pause automático Always-Free: mantém o Supabase ativo a cada acesso
+  useEffect(() => {
+    pingSupabase();
+  }, []);
 
   // Persistência das transações, categorias e metas
   useEffect(() => {

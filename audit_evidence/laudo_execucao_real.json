@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-03T00:04:49.234Z",
+  "timestamp": "2026-09-03T00:37:02.601Z",
   "target": "https://meu-bolso-t1k.pages.dev",
   "tests": [
     {
@@ -27,7 +27,7 @@
       "status": "PASS",
       "details": "Compensação de R$ 259,75 calculada com precisão",
       "data": {
-        "texto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas 50/50.Juliana Mafra deve a Henrique Mafra:R$ 259,75Registrar Acerto de Contas"
+        "texto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas da casa (50/50 e custos fixos comuns).Juliana Mafra deve a Henrique Mafra:R$ 259,75Registrar Acerto de Contas"
       }
     },
     {
@@ -38,7 +38,7 @@
         "novoSaldo": "R$ 9.594,50",
         "novasDespesas": "R$ 4.905,50",
         "novoComprometimento": "34%",
-        "acerto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas 50/50.Henrique Mafra deve a Juliana Mafra:R$ 40,25Registrar Acerto de Contas"
+        "acerto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas da casa (50/50 e custos fixos comuns).Henrique Mafra deve a Juliana Mafra:R$ 40,25Registrar Acerto de Contas"
       }
     },
     {

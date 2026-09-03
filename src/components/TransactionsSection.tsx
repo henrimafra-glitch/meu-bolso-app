@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
-import { Search, GraduationCap, HeartPulse, Home, ShoppingCart, Utensils, Tag } from 'lucide-react';
+import { Search, GraduationCap, HeartPulse, Home, ShoppingCart, Utensils, Tag, Download } from 'lucide-react';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -76,6 +76,30 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
     return matchesSearch && matchesSplit;
   });
 
+  const handleExportCSV = () => {
+    const headers = ['Data', 'Descrição', 'Categoria', 'Quem Pagou', 'Divisão', 'Tipo', 'Valor (R$)'];
+    const rows = filtered.map((t) => [
+      formatDate(t.date),
+      `"${t.description.replace(/"/g, '""')}"`,
+      `"${t.category_name || ''}"`,
+      `"${t.payer_name || ''}"`,
+      t.split_type === 'split_50_50' ? '50/50' : t.split_type === 'house_fixed' ? 'Fixo Casa' : 'Pessoal',
+      t.type === 'income' ? 'Receita' : 'Despesa',
+      t.amount.toFixed(2).replace('.', ',')
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `extrato_familiar_meu_bolso_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
       {/* Cabeçalho da Seção de Transações */}
@@ -101,6 +125,15 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
               className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-brand-600"
             />
           </div>
+
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold shadow-sm transition"
+            title="Exportar extrato das transações em formato CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Exportar CSV</span>
+          </button>
 
           <button
             onClick={onOpenNewTransaction}

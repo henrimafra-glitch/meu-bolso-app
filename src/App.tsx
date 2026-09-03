@@ -7,7 +7,7 @@ import {
   initialGoals,
   calculateSummary,
 } from './lib/mockData';
-import { Goal, FamilyMember, Transaction, SplitType, TransactionType } from './types';
+import { Goal, Category, FamilyMember, Transaction, SplitType, TransactionType } from './types';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { BottomNav } from './components/BottomNav';
@@ -25,15 +25,26 @@ export function App() {
   const [family] = useState(initialFamily);
   const [members] = useState(initialMembers);
   const [currentMember, setCurrentMember] = useState<FamilyMember>(initialMembers[0]);
-  const [categories, setCategories] = useState(initialCategories);
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [goals, setGoals] = useState(initialGoals);
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('meu_bolso_categories');
+    return saved ? JSON.parse(saved) : initialCategories;
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const saved = localStorage.getItem('meu_bolso_txs');
+    return saved ? JSON.parse(saved) : initialTransactions;
+  });
+  const [goals, setGoals] = useState<Goal[]>(() => {
+    const saved = localStorage.getItem('meu_bolso_goals');
+    return saved ? JSON.parse(saved) : initialGoals;
+  });
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedMonth, setSelectedMonth] = useState('Março 2026');
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('meu_bolso_theme') === 'dark';
+  });
   const [toast, setToast] = useState<ToastData | null>(null);
   const [goalModalState, setGoalModalState] = useState<{
     isOpen: boolean;
@@ -41,14 +52,29 @@ export function App() {
     selectedGoal?: Goal | null;
   }>({ isOpen: false, mode: 'deposit' });
 
-  // Sincronização do tema escuro
+  // Sincronização e persistência do tema escuro
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('meu_bolso_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('meu_bolso_theme', 'light');
     }
   }, [darkMode]);
+
+  // Persistência das transações, categorias e metas
+  useEffect(() => {
+    localStorage.setItem('meu_bolso_txs', JSON.stringify(transactions));
+  }, [transactions]);
+
+  useEffect(() => {
+    localStorage.setItem('meu_bolso_categories', JSON.stringify(categories));
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem('meu_bolso_goals', JSON.stringify(goals));
+  }, [goals]);
 
   const summary = calculateSummary(transactions, members);
 
@@ -169,9 +195,13 @@ export function App() {
   };
 
   const handleResetData = () => {
+    localStorage.removeItem('meu_bolso_txs');
+    localStorage.removeItem('meu_bolso_categories');
+    localStorage.removeItem('meu_bolso_goals');
     setTransactions(initialTransactions);
     setCategories(initialCategories);
     setGoals(initialGoals);
+    setToast({ message: 'Dados restaurados para o padrão original.', type: 'info' });
   };
 
   return (

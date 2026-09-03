@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Transaction } from '../types';
-import { Search, GraduationCap, HeartPulse, Home, ShoppingCart, Utensils, Tag, Download } from 'lucide-react';
+import { Search, GraduationCap, HeartPulse, Home, ShoppingCart, Utensils, Tag, Download, Printer } from 'lucide-react';
 
 interface TransactionsSectionProps {
   transactions: Transaction[];
@@ -132,7 +132,16 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
             title="Exportar extrato das transações em formato CSV"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Exportar CSV</span>
+            <span className="hidden sm:inline">CSV</span>
+          </button>
+
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold shadow-sm transition"
+            title="Imprimir extrato formatado"
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Imprimir</span>
           </button>
 
           <button
@@ -142,6 +151,14 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
             Novo Lançamento
           </button>
         </div>
+      </div>
+
+      {/* Cabeçalho exclusivo para impressão (Folha de Papel / PDF) */}
+      <div className="hidden print:block mb-6 border-b border-slate-300 pb-4">
+        <h1 className="text-xl font-bold text-slate-900">MEU BOLSO · Extrato Financeiro Familiar</h1>
+        <p className="text-xs text-slate-600">
+          Família Mafra · Competência: Março 2026 · Emitido em {new Date().toLocaleDateString('pt-BR')}
+        </p>
       </div>
 
       {/* Filtros de Rateio */}

@@ -24,7 +24,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside className="hidden lg:flex w-64 flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky top-0 h-screen transition-colors">
+    <aside className="hidden lg:flex print:hidden w-64 flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-4 sticky top-0 h-screen transition-colors">
       <div>
         {/* Marca Meu Bolso */}
         <div className="flex items-center gap-2.5 px-3 py-4 mb-6 border-b border-slate-100 dark:border-slate-800">

@@ -128,6 +128,36 @@ export function App() {
     setGoals([...goals, newGoal]);
   };
 
+  const handleSimulateInversion = () => {
+    const newTx: Transaction = {
+      id: `tx_sim_${Date.now()}`,
+      family_id: family.id,
+      paid_by: 'usr_juliana',
+      payer_name: 'Juliana Mafra',
+      category_id: 'cat_moradia',
+      category_name: 'Moradia & Contas',
+      type: 'expense',
+      amount: 600.0,
+      description: 'Manutenção Hidráulica da Cozinha (Simulação Auditoria)',
+      split_type: 'split_50_50',
+      date: '2026-03-03',
+    };
+
+    setTransactions([newTx, ...transactions]);
+
+    setCategories(
+      categories.map((c) =>
+        c.id === 'cat_moradia' ? { ...c, spent: c.spent + 600 } : c
+      )
+    );
+  };
+
+  const handleResetData = () => {
+    setTransactions(initialTransactions);
+    setCategories(initialCategories);
+    setGoals(initialGoals);
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* 1. Barra Lateral Executiva (Desktop >= 1024px) */}
@@ -258,6 +288,8 @@ export function App() {
               categories={categories}
               goals={goals}
               summary={summary}
+              onSimulateInversion={handleSimulateInversion}
+              onResetData={handleResetData}
             />
           )}
         </main>

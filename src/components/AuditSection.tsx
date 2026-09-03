@@ -19,6 +19,8 @@ interface AuditSectionProps {
   categories: Category[];
   goals: Goal[];
   summary: BalanceSummary;
+  onSimulateInversion: () => void;
+  onResetData: () => void;
 }
 
 interface TestResult {
@@ -36,10 +38,13 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
   categories,
   goals,
   summary,
+  onSimulateInversion,
+  onResetData,
 }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [hasRun, setHasRun] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [simulationToast, setSimulationToast] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
   const runAudit = () => {
@@ -234,11 +239,36 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
+            onClick={() => {
+              onSimulateInversion();
+              setSimulationToast('Simulação aplicada: Juliana pagou R$ 600 em 50/50. O saldo credor inverteu para Henrique deve R$ 40,25!');
+              setTimeout(() => runAudit(), 300);
+            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition"
+            title="Aplica automaticamente a despesa de teste de R$ 600 em 50/50"
+          >
+            <span>⚡ Simular Inversão de Dívida</span>
+          </button>
+
+          <button
+            onClick={() => {
+              onResetData();
+              setSimulationToast('Dados restaurados para o estado inicial!');
+              setTimeout(() => runAudit(), 300);
+            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+            title="Restaura os lançamentos originais"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+            <span>Restaurar Padrão</span>
+          </button>
+
+          <button
             onClick={copyMasterPrompt}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-            <span>{copied ? 'Prompt Copiado!' : 'Copiar Prompt para IAs'}</span>
+            <span>{copied ? 'Prompt Copiado!' : 'Copiar Prompt'}</span>
           </button>
 
           {hasRun && (
@@ -261,10 +291,26 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
             ) : (
               <Play className="w-3.5 h-3.5 fill-current" />
             )}
-            <span>{isRunning ? 'Executando Asserções...' : 'Executar Auditoria ao Vivo'}</span>
+            <span>{isRunning ? 'Executando...' : 'Executar Auditoria ao Vivo'}</span>
           </button>
         </div>
       </div>
+
+      {/* Banner de Feedback de Simulação */}
+      {simulationToast && (
+        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 flex items-center justify-between shadow-sm animate-fadeIn">
+          <div className="flex items-center gap-2 font-medium">
+            <span>⚡</span>
+            <span>{simulationToast}</span>
+          </div>
+          <button 
+            onClick={() => setSimulationToast(null)}
+            className="text-amber-600 dark:text-amber-400 hover:text-amber-900 font-bold ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Painel de Resultados */}
       {hasRun && (

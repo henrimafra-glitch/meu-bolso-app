@@ -1,0 +1,19 @@
+{
+  "name": "Meu Bolso · Gestão Financeira Familiar",
+  "short_name": "Meu Bolso",
+  "description": "Plataforma colaborativa de finanças familiares com rateio justo, tetos orçamentários e cofres de metas.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0D9488",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"]
+}

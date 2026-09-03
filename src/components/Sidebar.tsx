@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ReceiptText, PieChart, PiggyBank, Users, Moon, Sun, Wallet } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, PieChart, PiggyBank, Users, Moon, Sun, Wallet, ShieldCheck } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -20,6 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'budgets', label: 'Orçamentos', icon: PieChart },
     { id: 'goals', label: 'Cofres da Família', icon: PiggyBank },
     { id: 'members', label: 'Integrantes', icon: Users },
+    { id: 'audit', label: 'Auditoria & QA', icon: ShieldCheck },
   ];
 
   return (

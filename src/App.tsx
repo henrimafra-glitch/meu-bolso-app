@@ -17,6 +17,7 @@ import { TransactionsSection } from './components/TransactionsSection';
 import { GoalsSection } from './components/GoalsSection';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { InviteModal } from './components/InviteModal';
+import { AuditSection } from './components/AuditSection';
 
 export function App() {
   const [family] = useState(initialFamily);
@@ -245,6 +246,15 @@ export function App() {
                 ))}
               </div>
             </div>
+          )}
+
+          {activeTab === 'audit' && (
+            <AuditSection
+              transactions={transactions}
+              categories={categories}
+              goals={goals}
+              summary={summary}
+            />
           )}
         </main>
       </div>

@@ -7,7 +7,7 @@ import {
   initialGoals,
   calculateSummary,
 } from './lib/mockData';
-import { FamilyMember, Transaction, SplitType, TransactionType } from './types';
+import { Goal, FamilyMember, Transaction, SplitType, TransactionType } from './types';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { BottomNav } from './components/BottomNav';
@@ -18,6 +18,8 @@ import { GoalsSection } from './components/GoalsSection';
 import { NewTransactionModal } from './components/NewTransactionModal';
 import { InviteModal } from './components/InviteModal';
 import { AuditSection } from './components/AuditSection';
+import { Toast, ToastData } from './components/Toast';
+import { GoalModal } from './components/GoalModal';
 
 export function App() {
   const [family] = useState(initialFamily);
@@ -32,6 +34,12 @@ export function App() {
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [toast, setToast] = useState<ToastData | null>(null);
+  const [goalModalState, setGoalModalState] = useState<{
+    isOpen: boolean;
+    mode: 'deposit' | 'create';
+    selectedGoal?: Goal | null;
+  }>({ isOpen: false, mode: 'deposit' });
 
   // Sincronização do tema escuro
   useEffect(() => {
@@ -88,44 +96,52 @@ export function App() {
         )
       );
     }
+
+    setToast({ message: 'Lançamento registrado com sucesso!', type: 'success' });
   };
 
   const handleSettleDebt = () => {
-    alert(
-      'Acerto de contas realizado com sucesso! Os valores pendentes foram conciliados para a competência atual.'
-    );
+    setToast({
+      message: 'Acerto de contas realizado! Saldos compartilhados conciliados com sucesso.',
+      type: 'success',
+    });
   };
 
   const handleAddDepositToGoal = (goalId: string) => {
-    const depositStr = prompt('Qual o valor do aporte para este cofre? (R$):', '500');
-    if (!depositStr) return;
-    const amount = parseFloat(depositStr.replace(',', '.'));
-    if (isNaN(amount) || amount <= 0) return;
+    const goal = goals.find((g) => g.id === goalId);
+    setGoalModalState({ isOpen: true, mode: 'deposit', selectedGoal: goal });
+  };
 
+  const handleNewGoal = () => {
+    setGoalModalState({ isOpen: true, mode: 'create' });
+  };
+
+  const handleConfirmDeposit = (goalId: string, amount: number) => {
     setGoals(
       goals.map((g) =>
         g.id === goalId ? { ...g, current_amount: g.current_amount + amount } : g
       )
     );
+    setToast({
+      message: `Aporte de R$ ${amount.toFixed(2).replace('.', ',')} confirmado no cofre!`,
+      type: 'success',
+    });
   };
 
-  const handleNewGoal = () => {
-    const title = prompt('Título da nova meta familiar:');
-    if (!title) return;
-    const targetStr = prompt('Valor total da meta (R$):', '5000');
-    if (!targetStr) return;
-    const target = parseFloat(targetStr.replace(',', '.'));
-    if (isNaN(target) || target <= 0) return;
-
-    const newGoal = {
+  const handleConfirmCreateGoal = (title: string, targetAmount: number) => {
+    const newGoal: Goal = {
       id: `goal_${Date.now()}`,
       family_id: family.id,
       title,
-      target_amount: target,
+      target_amount: targetAmount,
       current_amount: 0,
       target_date: '2026-12-31',
     };
     setGoals([...goals, newGoal]);
+    setToast({
+      message: `Novo cofre "${title}" criado com sucesso!`,
+      type: 'success',
+    });
   };
 
   const handleSimulateInversion = () => {
@@ -317,6 +333,17 @@ export function App() {
         onClose={() => setIsInviteOpen(false)}
         family={family}
       />
+
+      <GoalModal
+        isOpen={goalModalState.isOpen}
+        onClose={() => setGoalModalState({ ...goalModalState, isOpen: false })}
+        mode={goalModalState.mode}
+        selectedGoal={goalModalState.selectedGoal}
+        onConfirmDeposit={handleConfirmDeposit}
+        onConfirmCreate={handleConfirmCreateGoal}
+      />
+
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }

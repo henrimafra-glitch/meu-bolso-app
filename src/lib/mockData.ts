@@ -12,7 +12,7 @@ export const initialMembers: FamilyMember[] = [
     family_id: 'fam_mafra_001',
     user_id: 'usr_henrique',
     role: 'admin',
-    color_tag: '#0D9488', // Teal da marca
+    color_tag: '#0D9488', // Teal
     profile: {
       id: 'usr_henrique',
       full_name: 'Henrique Mafra',
@@ -24,11 +24,11 @@ export const initialMembers: FamilyMember[] = [
     family_id: 'fam_mafra_001',
     user_id: 'usr_juliana',
     role: 'member',
-    color_tag: '#6366F1', // Indigo suave
+    color_tag: '#6366F1', // Indigo
     profile: {
       id: 'usr_juliana',
       full_name: 'Juliana Mafra',
-      avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+      avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     },
   },
   {
@@ -46,10 +46,10 @@ export const initialMembers: FamilyMember[] = [
 ];
 
 export const initialCategories: Category[] = [
-  { id: 'cat_moradia', name: 'Moradia & Contas', icon: 'Home', monthly_budget: 3500.0, spent: 2850.0 },
-  { id: 'cat_supermercado', name: 'Supermercado & Feira', icon: 'ShoppingCart', monthly_budget: 2200.0, spent: 1840.5 },
-  { id: 'cat_saude', name: 'Saúde & Farmácia', icon: 'HeartPulse', monthly_budget: 800.0, spent: 420.0 },
-  { id: 'cat_lazer', name: 'Lazer & Restaurantes', icon: 'Utensils', monthly_budget: 600.0, spent: 580.0 },
+  { id: 'cat_moradia', name: 'Moradia & Contas', icon: 'Home', monthly_budget: 3500.0, spent: 2100.0 },
+  { id: 'cat_supermercado', name: 'Supermercado & Feira', icon: 'ShoppingCart', monthly_budget: 2200.0, spent: 720.5 },
+  { id: 'cat_saude', name: 'Saúde & Farmácia', icon: 'HeartPulse', monthly_budget: 800.0, spent: 145.0 },
+  { id: 'cat_lazer', name: 'Lazer & Restaurantes', icon: 'Utensils', monthly_budget: 600.0, spent: 240.0 },
   { id: 'cat_educacao', name: 'Educação & Cursos', icon: 'GraduationCap', monthly_budget: 1100.0, spent: 1100.0 },
 ];
 
@@ -122,7 +122,7 @@ export const initialTransactions: Transaction[] = [
     amount: 145.0,
     description: 'Farmácia - Medicamentos de Uso Contínuo',
     split_type: 'personal',
-    date: '2026-02-28',
+    date: '2026-03-01',
   },
 ];
 
@@ -154,7 +154,8 @@ export const initialGoals: Goal[] = [
 ];
 
 export function calculateSummary(transactions: Transaction[], members: FamilyMember[]): BalanceSummary {
-  const totalIncome = 14500.0; // Soma das rendas declaradas do mês
+  const baseSalary = 14500.0;
+  let extraIncome = 0;
   let totalExpense = 0;
   const spentByMember: Record<string, number> = {};
 
@@ -166,9 +167,12 @@ export function calculateSummary(transactions: Transaction[], members: FamilyMem
     if (t.type === 'expense') {
       totalExpense += t.amount;
       spentByMember[t.paid_by] = (spentByMember[t.paid_by] || 0) + t.amount;
+    } else if (t.type === 'income') {
+      extraIncome += t.amount;
     }
   });
 
+  const totalIncome = baseSalary + extraIncome;
   const totalAvailable = totalIncome - totalExpense;
   const commitmentPct = totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 100) : 0;
 
@@ -184,30 +188,34 @@ export function calculateSummary(transactions: Transaction[], members: FamilyMem
     };
   });
 
-  // Cálculo de acerto de contas 50/50 entre Henrique e Juliana
+  // Cálculo de acerto de contas das despesas compartilhadas (50/50 e fixas da casa)
   let henriqueSharedPaid = 0;
   let julianaSharedPaid = 0;
 
   transactions.forEach(t => {
-    if (t.type === 'expense' && (t.split_type === 'split_50_50' || t.split_type === 'house_fixed')) {
-      if (t.paid_by === 'usr_henrique') henriqueSharedPaid += t.amount;
-      if (t.paid_by === 'usr_juliana') julianaSharedPaid += t.amount;
+    if (t.type === 'expense') {
+      if (t.split_type === 'split_50_50' || t.split_type === 'house_fixed') {
+        if (t.paid_by === 'usr_henrique') henriqueSharedPaid += t.amount;
+        if (t.paid_by === 'usr_juliana') julianaSharedPaid += t.amount;
+      }
     }
   });
 
   const debtSettlements = [];
   const diff = (henriqueSharedPaid - julianaSharedPaid) / 2;
-  if (diff > 0) {
+  const roundedDiff = Math.round(diff * 100) / 100;
+
+  if (roundedDiff > 0.009) {
     debtSettlements.push({
       debtorName: 'Juliana Mafra',
       creditorName: 'Henrique Mafra',
-      amount: Math.round(diff * 100) / 100,
+      amount: roundedDiff,
     });
-  } else if (diff < 0) {
+  } else if (roundedDiff < -0.009) {
     debtSettlements.push({
       debtorName: 'Henrique Mafra',
       creditorName: 'Juliana Mafra',
-      amount: Math.round(Math.abs(diff) * 100) / 100,
+      amount: Math.abs(roundedDiff),
     });
   }
 
@@ -219,4 +227,13 @@ export function calculateSummary(transactions: Transaction[], members: FamilyMem
     splitsByMember,
     debtSettlements,
   };
+}
+
+export function syncCategoriesWithTransactions(categories: Category[], transactions: Transaction[]): Category[] {
+  return categories.map(cat => {
+    const spent = transactions
+      .filter(t => t.category_id === cat.id && t.type === 'expense')
+      .reduce((acc, t) => acc + t.amount, 0);
+    return { ...cat, spent: Math.round(spent * 100) / 100 };
+  });
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Family } from '../types';
 import { X, Copy, Check, Users, ShieldAlert } from 'lucide-react';
 
@@ -11,6 +11,20 @@ interface InviteModalProps {
 export const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, family }) => {
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const inviteLink = `${window.location.origin}?invite=${family.invite_code}`;
@@ -22,7 +36,11 @@ export const InviteModal: React.FC<InviteModalProps> = ({ isOpen, onClose, famil
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
+    >
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">

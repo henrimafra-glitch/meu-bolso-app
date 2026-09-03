@@ -22,17 +22,21 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({ summary, onSettleD
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Saldo Familiar Disponível
             </span>
-            <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/50 text-brand-600">
+            <div className={`p-2 rounded-lg ${summary.totalAvailable < 0 ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600' : 'bg-brand-50 dark:bg-brand-950/50 text-brand-600'}`}>
               <Wallet className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <span className={`text-2xl font-bold tracking-tight ${summary.totalAvailable < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
               {formatBRL(summary.totalAvailable)}
             </span>
           </div>
           <div className="mt-2 flex items-center text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium text-slate-700 dark:text-slate-300 mr-1">Renda familiar livre</span> após gastos fixos e variáveis
+            {summary.totalAvailable < 0 ? (
+              <span className="font-semibold text-rose-600 dark:text-rose-400">Déficit orçamentário detectado no mês</span>
+            ) : (
+              <span><span className="font-medium text-slate-700 dark:text-slate-300 mr-1">Renda familiar livre</span> após gastos fixos e variáveis</span>
+            )}
           </div>
         </div>
 
@@ -165,7 +169,7 @@ export const DashboardHero: React.FC<DashboardHeroProps> = ({ summary, onSettleD
               </h3>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Acerto de contas automático das despesas compartilhadas 50/50.
+              Acerto de contas automático das despesas compartilhadas da casa (50/50 e custos fixos comuns).
             </p>
 
             <div className="mt-4">

@@ -69,9 +69,11 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
     }
   };
 
+  const query = searchTerm.trim().toLowerCase();
   const filtered = transactions.filter((t) => {
-    const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.payer_name && t.payer_name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = !query ||
+      t.description.toLowerCase().includes(query) ||
+      (t.payer_name && t.payer_name.toLowerCase().includes(query));
     const matchesSplit = filterSplit === 'all' || t.split_type === filterSplit;
     return matchesSearch && matchesSplit;
   });
@@ -219,74 +221,90 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({ transa
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {filtered.map((t) => (
-              <tr key={t.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition">
-                <td className="py-3 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap font-mono">
-                  {formatDate(t.date)}
-                </td>
-                <td className="py-3 px-3 font-medium text-slate-900 dark:text-white">
-                  {t.description}
-                </td>
-                <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
-                  <div className="flex items-center gap-1.5">
-                    <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {getCategoryIcon(t.category_icon)}
-                    </span>
-                    <span>{t.category_name}</span>
-                  </div>
-                </td>
-                <td className="py-3 px-3 text-slate-700 dark:text-slate-300">
-                  {t.payer_name}
-                </td>
-                <td className="py-3 px-3">
-                  {getSplitBadge(t.split_type)}
-                </td>
-                <td className={`py-3 px-3 text-right font-bold font-mono ${
-                  t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
-                }`}>
-                  {t.type === 'income' ? '+' : '-'} {formatBRL(t.amount)}
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nenhum lançamento encontrado</p>
+                  <p className="text-[11px] mt-0.5">Tente ajustar a busca ou os filtros de divisão acima.</p>
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((t) => (
+                <tr key={t.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition">
+                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap font-mono">
+                    {formatDate(t.date)}
+                  </td>
+                  <td className="py-3 px-3 font-medium text-slate-900 dark:text-white">
+                    {t.description}
+                  </td>
+                  <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-1.5">
+                      <span className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        {getCategoryIcon(t.category_icon)}
+                      </span>
+                      <span>{t.category_name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-3 text-slate-700 dark:text-slate-300">
+                    {t.payer_name}
+                  </td>
+                  <td className="py-3 px-3">
+                    {getSplitBadge(t.split_type)}
+                  </td>
+                  <td className={`py-3 px-3 text-right font-bold font-mono ${
+                    t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
+                  }`}>
+                    {t.type === 'income' ? '+' : '-'} {formatBRL(t.amount)}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       {/* 2. Visão Mobile (< 1024px): Cards Verticais Ergonômicos */}
       <div className="lg:hidden space-y-2.5">
-        {filtered.map((t) => (
-          <div
-            key={t.id}
-            className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between gap-3"
-          >
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-9 h-9 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
-                {getCategoryIcon(t.category_icon)}
+        {filtered.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/20 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-4">
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nenhum lançamento encontrado</p>
+            <p className="text-[11px] mt-0.5">Tente ajustar a busca ou os filtros de divisão.</p>
+          </div>
+        ) : (
+          filtered.map((t) => (
+            <div
+              key={t.id}
+              className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="w-9 h-9 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                  {getCategoryIcon(t.category_icon)}
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                    {t.description}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>{t.payer_name?.split(' ')[0]}</span>
+                    <span>•</span>
+                    <span>{formatDate(t.date)}</span>
+                  </div>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">
-                  {t.description}
+
+              <div className="text-right shrink-0">
+                <p className={`text-xs font-bold font-mono ${
+                  t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
+                }`}>
+                  {t.type === 'income' ? '+' : '-'} {formatBRL(t.amount)}
                 </p>
-                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>{t.payer_name?.split(' ')[0]}</span>
-                  <span>•</span>
-                  <span>{formatDate(t.date)}</span>
+                <div className="mt-1">
+                  {getSplitBadge(t.split_type)}
                 </div>
               </div>
             </div>
-
-            <div className="text-right shrink-0">
-              <p className={`text-xs font-bold font-mono ${
-                t.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'
-              }`}>
-                {t.type === 'income' ? '+' : '-'} {formatBRL(t.amount)}
-              </p>
-              <div className="mt-1">
-                {getSplitBadge(t.split_type)}
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

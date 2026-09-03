@@ -1,0 +1,21 @@
+Return Code: 0
+
+STDOUT:
+
+ ⛅️ wrangler 4.86.0 (update available 4.128.0)
+──────────────────────────────────────────────
+Uploading... (1/4)
+Uploading... (2/4)
+Uploading... (3/4)
+Uploading... (4/4)
+✨ Success! Uploaded 3 files (1 already uploaded) (1.17 sec)
+
+✨ Uploading _headers
+✨ Uploading _redirects
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://1c980046.meu-bolso-t1k.pages.dev
+
+
+STDERR:
+
+

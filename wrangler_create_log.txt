@@ -1,0 +1,13 @@
+Return Code: 0
+
+STDOUT:
+
+ ⛅️ wrangler 4.86.0 (update available 4.128.0)
+──────────────────────────────────────────────
+✨ Successfully created the 'meu-bolso' project. It will be available at https://meu-bolso-t1k.pages.dev/ once you create your first deployment.
+To deploy a folder of assets, run 'wrangler pages deploy [directory]'.
+
+
+STDERR:
+
+

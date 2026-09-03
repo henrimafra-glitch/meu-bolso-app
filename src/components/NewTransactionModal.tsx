@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Category, FamilyMember, SplitType, TransactionType } from '../types';
 import { X, ArrowDownRight, ArrowUpRight, Scale } from 'lucide-react';
 
@@ -8,6 +8,7 @@ interface NewTransactionModalProps {
   categories: Category[];
   members: FamilyMember[];
   currentMember: FamilyMember;
+  selectedMonth?: string;
   onSave: (data: {
     type: TransactionType;
     description: string;
@@ -15,6 +16,7 @@ interface NewTransactionModalProps {
     category_id: string;
     paid_by: string;
     split_type: SplitType;
+    date: string;
   }) => void;
 }
 
@@ -32,6 +34,22 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
   const [categoryId, setCategoryId] = useState(categories[0]?.id || '');
   const [paidBy, setPaidBy] = useState(currentMember.user_id);
   const [splitType, setSplitType] = useState<SplitType>('split_50_50');
+  const [date, setDate] = useState('2026-03-03');
+
+  // Acessibilidade: Fechar no ESC e travar scroll do body
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -43,7 +61,7 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
       return;
     }
     if (!description.trim()) {
-      alert('Por favor, informe a descrição da despesa.');
+      alert('Por favor, informe a descrição do lançamento.');
       return;
     }
 
@@ -53,7 +71,8 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
       amount: cleanAmount,
       category_id: categoryId,
       paid_by: paidBy,
-      split_type: splitType,
+      split_type: type === 'income' ? 'personal' : splitType,
+      date: date || '2026-03-03',
     });
 
     setDescription('');
@@ -62,19 +81,25 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="new-tx-title"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn"
+    >
       {/* Container: Bottom sheet em mobile (<640px) e Modal centralizado em desktop */}
       <div className="bg-white dark:bg-slate-900 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-slideUp">
         {/* Cabeçalho */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-brand-600" />
-            <h3 className="font-semibold text-slate-900 dark:text-white text-base">
+            <h3 id="new-tx-title" className="font-semibold text-slate-900 dark:text-white text-base">
               Novo Lançamento
             </h3>
           </div>
           <button
             onClick={onClose}
+            aria-label="Fechar modal"
             className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg transition"
           >
             <X className="w-5 h-5" />
@@ -129,25 +154,43 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
             </div>
           </div>
 
-          {/* Descrição */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Descrição
-            </label>
-            <input
-              type="text"
-              placeholder="Ex: Supermercado, Aluguel, Farmácia..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-600 focus:outline-none"
-            />
+          {/* Descrição e Data */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Descrição
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Supermercado..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-600 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Data do Lançamento
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-600 focus:outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Categoria & Membro Pagador */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Categoria
+                {type === 'expense' ? 'Categoria' : 'Origem'}
               </label>
               <select
                 value={categoryId}
@@ -164,7 +207,7 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Quem Pagou
+                {type === 'expense' ? 'Quem Pagou' : 'Quem Recebeu'}
               </label>
               <select
                 value={paidBy}
@@ -180,7 +223,7 @@ export const NewTransactionModal: React.FC<NewTransactionModalProps> = ({
             </div>
           </div>
 
-          {/* Opção de Rateio (Crucial para o app familiar) */}
+          {/* Opção de Rateio (Exclusiva para despesas) */}
           {type === 'expense' && (
             <div>
               <div className="flex items-center gap-1.5 mb-1.5">

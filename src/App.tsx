@@ -6,6 +6,7 @@ import {
   initialTransactions,
   initialGoals,
   calculateSummary,
+  syncCategoriesWithTransactions,
 } from './lib/mockData';
 import { Goal, Category, FamilyMember, Transaction, SplitType, TransactionType } from './types';
 import { Header } from './components/Header';
@@ -76,14 +77,42 @@ export function App() {
     localStorage.setItem('meu_bolso_goals', JSON.stringify(goals));
   }, [goals]);
 
-  const summary = calculateSummary(transactions, members);
+  const availableMonths = [
+    'Janeiro 2026',
+    'Fevereiro 2026',
+    'Março 2026',
+    'Abril 2026',
+    'Maio 2026',
+  ];
+
+  const monthCodeMap: Record<string, string> = {
+    'Janeiro 2026': '2026-01',
+    'Fevereiro 2026': '2026-02',
+    'Março 2026': '2026-03',
+    'Abril 2026': '2026-04',
+    'Maio 2026': '2026-05',
+  };
+
+  const activeMonthCode = monthCodeMap[selectedMonth] || '2026-03';
+  const monthlyTransactions = transactions.filter((t) =>
+    t.date.startsWith(activeMonthCode)
+  );
+
+  const summary = calculateSummary(monthlyTransactions, members);
+  const activeCategories = syncCategoriesWithTransactions(
+    categories,
+    monthlyTransactions
+  );
 
   const handlePrevMonth = () => {
-    setSelectedMonth('Fevereiro 2026');
+    const idx = availableMonths.indexOf(selectedMonth);
+    if (idx > 0) setSelectedMonth(availableMonths[idx - 1]);
   };
 
   const handleNextMonth = () => {
-    setSelectedMonth('Abril 2026');
+    const idx = availableMonths.indexOf(selectedMonth);
+    if (idx < availableMonths.length - 1)
+      setSelectedMonth(availableMonths[idx + 1]);
   };
 
   const handleSaveTransaction = (data: {
@@ -93,6 +122,7 @@ export function App() {
     category_id: string;
     paid_by: string;
     split_type: SplitType;
+    date: string;
   }) => {
     const category = categories.find((c) => c.id === data.category_id);
     const payer = members.find((m) => m.user_id === data.paid_by);
@@ -108,27 +138,45 @@ export function App() {
       type: data.type,
       amount: data.amount,
       description: data.description,
-      split_type: data.split_type,
-      date: new Date().toISOString().split('T')[0],
+      split_type: data.type === 'income' ? 'personal' : data.split_type,
+      date: data.date,
     };
 
     setTransactions([newTx, ...transactions]);
-
-    // Atualiza o gasto da categoria se for despesa
-    if (data.type === 'expense') {
-      setCategories(
-        categories.map((c) =>
-          c.id === data.category_id ? { ...c, spent: c.spent + data.amount } : c
-        )
-      );
-    }
-
-    setToast({ message: 'Lançamento registrado com sucesso!', type: 'success' });
+    setToast({
+      message: `${data.type === 'income' ? 'Receita' : 'Despesa'} registrada com sucesso!`,
+      type: 'success',
+    });
   };
 
   const handleSettleDebt = () => {
+    if (summary.debtSettlements.length === 0) {
+      setToast({
+        message: 'As contas já estão 100% equilibradas neste mês!',
+        type: 'info',
+      });
+      return;
+    }
+    const debt = summary.debtSettlements[0];
+    const isJuliana = debt.debtorName.includes('Juliana');
+    const settleTx: Transaction = {
+      id: `tx_settle_${Date.now()}`,
+      family_id: family.id,
+      paid_by: isJuliana ? 'usr_juliana' : 'usr_henrique',
+      payer_name: debt.debtorName,
+      category_id: 'cat_moradia',
+      category_name: 'Moradia & Contas',
+      category_icon: 'Home',
+      type: 'expense',
+      amount: Math.round(debt.amount * 2 * 100) / 100,
+      description: `Liquidação de Rateio: ${debt.debtorName} quitou pendência com ${debt.creditorName}`,
+      split_type: 'split_50_50',
+      date: `${activeMonthCode}-15`,
+    };
+
+    setTransactions([settleTx, ...transactions]);
     setToast({
-      message: 'Acerto de contas realizado! Saldos compartilhados conciliados com sucesso.',
+      message: `Acerto registrado! ${debt.debtorName} quitou R$ ${debt.amount.toFixed(2).replace('.', ',')} com ${debt.creditorName}. Dívida zerada!`,
       type: 'success',
     });
   };
@@ -240,11 +288,11 @@ export function App() {
               <DashboardHero summary={summary} onSettleDebt={handleSettleDebt} />
 
               {/* Orçamentos por Categoria (Budget Caps) */}
-              <BudgetSection categories={categories} />
+              <BudgetSection categories={activeCategories} />
 
               {/* Transações Recentes & Divisão de Contas */}
               <TransactionsSection
-                transactions={transactions}
+                transactions={monthlyTransactions}
                 onOpenNewTransaction={() => setIsNewTxOpen(true)}
               />
 
@@ -259,14 +307,14 @@ export function App() {
 
           {activeTab === 'transactions' && (
             <TransactionsSection
-              transactions={transactions}
+              transactions={monthlyTransactions}
               onOpenNewTransaction={() => setIsNewTxOpen(true)}
             />
           )}
 
           {activeTab === 'budgets' && (
             <div className="space-y-4">
-              <BudgetSection categories={categories} />
+              <BudgetSection categories={activeCategories} />
             </div>
           )}
 
@@ -330,8 +378,8 @@ export function App() {
 
           {activeTab === 'audit' && (
             <AuditSection
-              transactions={transactions}
-              categories={categories}
+              transactions={monthlyTransactions}
+              categories={activeCategories}
               goals={goals}
               summary={summary}
               onSimulateInversion={handleSimulateInversion}

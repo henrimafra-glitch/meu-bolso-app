@@ -168,7 +168,11 @@ export const BudgetSection: React.FC<BudgetSectionProps> = ({ categories }) => {
               {isOver && (
                 <div className="mt-3 pt-2 border-t border-rose-100 dark:border-rose-900/30 flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>Limite estourado em {formatBRL(cat.spent - cat.monthly_budget)}</span>
+                  <span>
+                    {cat.spent > cat.monthly_budget
+                      ? `Limite estourado em ${formatBRL(cat.spent - cat.monthly_budget)}`
+                      : 'Limite mensal atingido (100%)'}
+                  </span>
                 </div>
               )}
             </div>

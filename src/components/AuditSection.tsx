@@ -70,15 +70,35 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
       const totalPct = summary.splitsByMember.reduce((acc, m) => acc + m.percentage, 0);
       const isRateio100 = Math.abs(totalPct - 100) <= 1;
 
-      // 5. Compensação Líquida de Acerto 50/50
-      const hasDebt = summary.debtSettlements.length > 0;
-      const debtText = hasDebt 
-        ? `${summary.debtSettlements[0].debtorName} deve a ${summary.debtSettlements[0].creditorName}: R$ ${summary.debtSettlements[0].amount.toFixed(2)}`
-        : 'Saldos zerados';
+      // 5. Compensação Líquida de Acerto das Contas Compartilhadas
+      let henriqueShared = 0;
+      let julianaShared = 0;
+      transactions.forEach(t => {
+        if (t.type === 'expense' && (t.split_type === 'split_50_50' || t.split_type === 'house_fixed')) {
+          if (t.paid_by === 'usr_henrique') henriqueShared += t.amount;
+          if (t.paid_by === 'usr_juliana') julianaShared += t.amount;
+        }
+      });
+      const expectedDiff = (henriqueShared - julianaShared) / 2;
+      const expectedDebtAmount = Math.round(Math.abs(expectedDiff) * 100) / 100;
+      const expectedDebtor = expectedDiff > 0 ? 'Juliana Mafra' : expectedDiff < 0 ? 'Henrique Mafra' : 'Ninguém';
+      const expectedCreditor = expectedDiff > 0 ? 'Henrique Mafra' : expectedDiff < 0 ? 'Juliana Mafra' : 'Ninguém';
+      const isSettlementAccurate = expectedDebtAmount === 0 
+        ? summary.debtSettlements.length === 0
+        : summary.debtSettlements.length > 0 &&
+          summary.debtSettlements[0].debtorName === expectedDebtor &&
+          Math.abs(summary.debtSettlements[0].amount - expectedDebtAmount) < 0.01;
+      
+      const expectedDebtStr = expectedDebtAmount === 0 
+        ? 'Contas 100% equilibradas' 
+        : `${expectedDebtor} deve a ${expectedCreditor}: R$ ${expectedDebtAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+      const observedDebtStr = summary.debtSettlements.length === 0
+        ? 'Contas 100% equilibradas'
+        : `${summary.debtSettlements[0].debtorName} deve a ${summary.debtSettlements[0].creditorName}: R$ ${summary.debtSettlements[0].amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
-      // 6. Alertas de Orçamento
-      const educationCat = categories.find(c => c.id === 'cat_educacao');
-      const isEducationBlowout = educationCat ? educationCat.spent >= educationCat.monthly_budget : false;
+      // 6. Reconciliação dos Tetos de Orçamento com o Razão
+      const sumCatSpent = categories.reduce((acc, c) => acc + c.spent, 0);
+      const isBudgetReconciled = Math.abs(sumCatSpent - summary.monthlyExpense) < 0.01;
 
       // 7. Integridade de Cofres
       const emergencyGoal = goals.find(g => g.id === 'goal_1');
@@ -133,20 +153,20 @@ export const AuditSection: React.FC<AuditSectionProps> = ({
         },
         {
           id: 'T5',
-          name: 'Algoritmo de Compensação Líquida (Acerto 50/50)',
+          name: 'Algoritmo de Compensação Líquida (Acerto de Contas)',
           category: 'Contabilidade',
-          expected: 'Cálculo com diferença dividida por 2',
-          observed: debtText,
-          status: hasDebt ? 'PASS' : 'FAIL',
+          expected: expectedDebtStr,
+          observed: observedDebtStr,
+          status: isSettlementAccurate ? 'PASS' : 'FAIL',
           latencyMs: 1.4,
         },
         {
           id: 'T6',
-          name: 'Detecção de Limite Estourado em Categoria',
+          name: 'Reconciliação dos Tetos de Orçamento com o Razão',
           category: 'Contabilidade',
-          expected: 'Educação >= 100% com alerta visual',
-          observed: isEducationBlowout ? 'Limite de 100% atingido' : 'Normal',
-          status: isEducationBlowout ? 'PASS' : 'FAIL',
+          expected: `R$ ${summary.monthlyExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} gasto total`,
+          observed: `R$ ${sumCatSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} alocado`,
+          status: isBudgetReconciled ? 'PASS' : 'FAIL',
           latencyMs: 0.7,
         },
         {

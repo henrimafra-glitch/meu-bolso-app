@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-09-03T00:04:49.234Z",
+  "target": "https://meu-bolso-t1k.pages.dev",
+  "tests": [
+    {
+      "name": "Segurança de Borda Cloudflare",
+      "status": "PASS",
+      "details": "Headers de segurança HTTP verificados",
+      "data": {
+        "hsts": "max-age=31536000; includeSubDomains; preload",
+        "xFrame": "DENY",
+        "xContent": "nosniff"
+      }
+    },
+    {
+      "name": "Gabarito Contábil Inicial",
+      "status": "PASS",
+      "details": "Saldos, despesas e percentual nominais conferidos com 100% de exatidão",
+      "data": {
+        "saldo": "R$ 10.194,50",
+        "despesas": "R$ 4.305,50",
+        "comprometimento": "30%"
+      }
+    },
+    {
+      "name": "Acerto de Contas Inicial (50/50)",
+      "status": "PASS",
+      "details": "Compensação de R$ 259,75 calculada com precisão",
+      "data": {
+        "texto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas 50/50.Juliana Mafra deve a Henrique Mafra:R$ 259,75Registrar Acerto de Contas"
+      }
+    },
+    {
+      "name": "Efeito Borboleta & Inversão de Dívida",
+      "status": "PASS",
+      "details": "Todos os 4 cards e a inversão de débito (R$ 40,25) foram recalculados atomicamente",
+      "data": {
+        "novoSaldo": "R$ 9.594,50",
+        "novasDespesas": "R$ 4.905,50",
+        "novoComprometimento": "34%",
+        "acerto": "Equilíbrio do MêsAcerto de contas automático das despesas compartilhadas 50/50.Henrique Mafra deve a Juliana Mafra:R$ 40,25Registrar Acerto de Contas"
+      }
+    },
+    {
+      "name": "Filtro de Busca em Tempo Real",
+      "status": "PASS",
+      "details": "Busca por substring isolou exatamente 1 registro correspondente",
+      "data": {}
+    },
+    {
+      "name": "Pílulas de Filtro de Rateio",
+      "status": "PASS",
+      "details": "Filtro \"Fixo da Casa\" isolou 2 transações",
+      "data": {}
+    },
+    {
+      "name": "Ergonomia Dual Mobile/Desktop",
+      "status": "PASS",
+      "details": "Mobile < 1024px oculta sidebar/tabela e renderiza bottom-nav/cards verticais perfeitamente",
+      "data": {}
+    },
+    {
+      "name": "Mecanismo de Dark Mode",
+      "status": "PASS",
+      "details": "Classe .dark injetada na raiz HTML com renderização imediata",
+      "data": {}
+    },
+    {
+      "name": "Logs de Console & Erros em Runtime",
+      "status": "PASS",
+      "details": "Zero exceções ou erros não tratados durante todos os fluxos",
+      "data": {}
+    }
+  ],
+  "metrics": {},
+  "passedCount": 9,
+  "failedCount": 0
+}

@@ -150,6 +150,10 @@ export function App() {
           onPrevMonth={handlePrevMonth}
           onNextMonth={handleNextMonth}
           onOpenInvite={() => setIsInviteOpen(true)}
+          onOpenAudit={() => setActiveTab('audit')}
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          isAuditActive={activeTab === 'audit'}
         />
 
         {/* Conteúdo Dinâmico por Aba */}

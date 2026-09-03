@@ -1,6 +1,6 @@
 import React from 'react';
 import { Family, FamilyMember } from '../types';
-import { ChevronLeft, ChevronRight, UserPlus, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, UserPlus, Users, ShieldCheck, Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
   family: Family;
@@ -11,6 +11,10 @@ interface HeaderProps {
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onOpenInvite: () => void;
+  onOpenAudit: () => void;
+  darkMode: boolean;
+  onToggleDarkMode: () => void;
+  isAuditActive: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +26,10 @@ export const Header: React.FC<HeaderProps> = ({
   onPrevMonth,
   onNextMonth,
   onOpenInvite,
+  onOpenAudit,
+  darkMode,
+  onToggleDarkMode,
+  isAuditActive,
 }) => {
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 px-4 lg:px-8 py-3 transition-colors">
@@ -47,13 +55,33 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={onOpenInvite}
-            className="sm:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
-            title="Convidar Integrante"
-          >
-            <UserPlus className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1 sm:hidden">
+            <button
+              onClick={onToggleDarkMode}
+              className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+              title="Alternar Tema"
+            >
+              {darkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-500" />}
+            </button>
+            <button
+              onClick={onOpenAudit}
+              className={`p-2 rounded-lg border transition ${
+                isAuditActive 
+                  ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-600 border-brand-500'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700'
+              }`}
+              title="Auditoria & QA"
+            >
+              <ShieldCheck className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onOpenInvite}
+              className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700"
+              title="Convidar Integrante"
+            >
+              <UserPlus className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Centro / Direita: Seletor de Mês e Membros */}
@@ -104,6 +132,18 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               })}
             </div>
+
+            <button
+              onClick={onOpenAudit}
+              className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition ${
+                isAuditActive
+                  ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border-brand-500'
+                  : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-brand-600" />
+              <span>Auditoria QA</span>
+            </button>
 
             <button
               onClick={onOpenInvite}
